@@ -1,0 +1,16 @@
+name: blury
+channels:
+- anaconda-fusion
+- anaconda
+- defaults
+dependencies:
+- python=3.5
+- opencv
+- numpy
+- scipy
+- cython
+- yaml
+- pip:
+  - face_recognition
+  - configparser
+  - tensorflow

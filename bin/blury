@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from os.path import join, expanduser, dirname
+from os import walk, pardir
+import sys
+import argparse
+import time
+
+from blury.lib import Blury
+
+usage = '%(prog)s'
+description = 'This is Blury, he will help you to blur persons and plate licence car on your images'
+parser = argparse.ArgumentParser(description=description, usage=usage)
+parser.add_argument('data_in_path', help='directory which contains input data.')
+parser.add_argument('data_out_path', help='directory which contains output data.')
+parser.add_argument('threshold',help='threshold of the model, value to define how strict is your model')
+parser.add_argument('filter', help='Power of filter.')
+    
+def main(args):
+    t0 = time.time()
+    data_in_path = expanduser(args.data_in_path)
+    data_out_path = expanduser(args.data_out_path)
+    nb_filter = int(args.filter)
+    threshold = float(args.threshold)
+
+    # Init our blury instance to blur plates and persons
+    blury = Blury(threshold=threshold, nb_filter=nb_filter)
+
+    # Generate all in_dir files
+    for root, dirs, img_files in walk(data_in_path):
+        for img_file in img_files:
+            # Use blury to dectect and blur region of interest on the image
+            if blury.load_img(join(root, img_file)) == False: continue
+            predictions = blury.predict()
+            blury.blur(predictions)
+            blury.save(data_out_path, img_file)
+
+    print("This take {0:.3f}min\n".format((time.time() - t0) / 60))
+
+if __name__ == '__main__':
+    sys.exit(main(parser.parse_args()))
